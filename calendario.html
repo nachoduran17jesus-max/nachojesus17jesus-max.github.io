@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calendario · Ruta Mediterránea 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/estilo.css">
+</head>
+<body>
+<div id="nav-mount"></div>
+<div id="head-mount"></div>
+
+<section><div class="wrap">
+  <div class="cal-legend" id="cal-legend"></div>
+  <div class="cal-wrap" id="cal-wrap"></div>
+  <p style="font-size:.8rem;color:var(--gris);margin-top:18px">El color de cada día es el destino donde duermes esa noche. El icono ✈️/🚌/⛴️ marca el día que viajas y llegas a esa parada. El 5 sep es el fin del viaje (inicio del intercambio en Málaga).</p>
+</div></section>
+
+<div id="foot-mount"></div>
+
+<script src="assets/data.js"></script>
+<script src="assets/comun.js"></script>
+<script>
+initChrome({active:'calendario', eyebrow:'Día a día', titulo:'Calendario del viaje · jul – sep 2026',
+  sub:'Cada día coloreado por el destino donde duermes esa noche. Útil para ver de un vistazo cuántos días caen en cada sitio y cuándo toca moverse.'});
+
+const MESES=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+const DOW=['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+const pad=n=>String(n).padStart(2,'0');
+const iso=dt=>`${dt.getFullYear()}-${pad(dt.getMonth()+1)}-${pad(dt.getDate())}`;
+const parse=s=>{const[a,b,c]=s.split('-').map(Number);return new Date(a,b-1,c);};
+
+/* Mapa fecha -> {destino, llegada?} : duermes en un destino desde llegada hasta salida-1 */
+const modoDe={}; TRAMOS.forEach(t=>modoDe[t.a]=t.modo);
+const icono=id=>{const m=modoDe[id]; if(id==='split'||id==='nice'||id==='mallorca'||id==='malaga'||id==='ibiza') {return m==='aire'?'✈️':(m==='tierra'?'⛴️':'🚌');} return m==='aire'?'✈️':'🚌';};
+const byDate={};
+DESTINOS.forEach(d=>{
+  const start=parse(d.llegada), end=parse(d.salida);
+  for(let t=new Date(start); t<end; t.setDate(t.getDate()+1)){
+    byDate[iso(t)]={d, llegada:iso(t)===d.llegada};
+  }
+});
+
+function mes(year,m){
+  const first=new Date(year,m,1);
+  const dias=new Date(year,m+1,0).getDate();
+  const lead=(first.getDay()+6)%7; // lunes primero
+  let cells='';
+  DOW.forEach(x=>cells+=`<div class="cal-dow">${x}</div>`);
+  for(let i=0;i<lead;i++) cells+=`<div class="cal-cell empty"></div>`;
+  for(let day=1;day<=dias;day++){
+    const key=iso(new Date(year,m,day));
+    const info=byDate[key];
+    if(info){
+      const d=info.d;
+      const mv=info.llegada?`<span class="mv">${icono(d.id)}</span>`:'';
+      cells+=`<div class="cal-cell trip" style="background:${d.color}" title="${d.n} · ${d.fechas}">
+        ${mv}<span class="dn">${day}</span><span class="city">${d.n.split(' ')[0].split('/')[0]}</span></div>`;
+    } else {
+      cells+=`<div class="cal-cell"><span class="dn">${day}</span></div>`;
+    }
+  }
+  return `<div class="cal-month"><h3>${MESES[m]} ${year}</h3><div class="cal-grid">${cells}</div></div>`;
+}
+
+$('#cal-wrap').innerHTML = [mes(2026,6),mes(2026,7),mes(2026,8)].join('');
+$('#cal-legend').innerHTML = DESTINOS.map(d=>`<span class="lg"><span class="sw" style="background:${d.color}"></span>${d.n.split(' +')[0].split(' /')[0]}</span>`).join('');
+</script>
+</body>
+</html>

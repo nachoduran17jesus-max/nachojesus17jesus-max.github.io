@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Timeline · Ruta Mediterránea 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/estilo.css">
+</head>
+<body>
+<div id="nav-mount"></div>
+<div id="head-mount"></div>
+
+<section><div class="wrap">
+  <div class="tl" id="timeline-list"></div>
+</div></section>
+
+<div id="foot-mount"></div>
+
+<script src="assets/data.js"></script>
+<script src="assets/comun.js"></script>
+<script>
+initChrome({active:'timeline', eyebrow:'Día a día', titulo:'Línea de tiempo · 19 jul → 5 sep',
+  sub:'Dónde estás cada bloque, cuándo viajas, fiesta fuerte (negro/dorado), playa (azul) y tramos baratos (verde).'});
+
+$('#timeline-list').innerHTML = DESTINOS.map((d,i)=>{
+  const tags=d.tipo.map(tipoChip).join('');
+  const evt=d.eventos.filter(e=>e.prioridad==='alta').map(e=>`<span class="chip evento">🎧 ${e.nombre}</span>`).join('');
+  return `<div class="tl-item"><div class="tl-dot">${i+1}</div>
+    <div class="tl-card" style="border-left-color:${d.color}">
+      <div class="d"><h4>${d.n} <span style="font-weight:400;color:var(--gris);font-size:.85rem">· ${d.pais}</span></h4><span class="dates">${d.fechas} · ${d.noches}n</span></div>
+      <div class="tl-tags">${tags}${evt}</div></div></div>`;
+}).join('');
+</script>
+</body>
+</html>

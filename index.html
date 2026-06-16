@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ruta Mediterránea 2026 · Inicio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/estilo.css">
+</head>
+<body>
+<div id="nav-mount"></div>
+
+<header class="hero">
+  <div class="hero-photo"><img src="https://loremflickr.com/1600/900/mediterranean,sea,coast,aerial?lock=70" alt="" onerror="this.remove()"></div>
+  <div class="wrap">
+    <div class="eyebrow" style="color:#ffe1a0">Plan de viaje · verano 2026</div>
+    <h1>De Madrid a Málaga,<br><em>por todo el Mediterráneo</em></h1>
+    <p class="lead">48 noches por España, Francia, Croacia, Montenegro y Albania — playas turquesa, ciudades, beach clubs y un final electrónico en Ibiza. Este sitio está dividido en secciones: usa el menú o las tarjetas de abajo.</p>
+    <div class="hero-stats" id="heroStats"></div>
+    <div class="hero-route" id="heroRoute"></div>
+    <div class="hero-updated" id="heroUpdated">● Datos actualizados</div>
+  </div>
+</header>
+
+<section><div class="wrap">
+  <div class="eyebrow">Secciones</div>
+  <h2 class="sec-title">Explora el plan por partes</h2>
+  <p class="sec-sub">Cada sección es su propia página. Entra a la que te interese — el menú de arriba te lleva a todas y dentro de cada una hay botones para ir a la anterior/siguiente.</p>
+  <div class="index-grid" id="indexGrid"></div>
+</div></section>
+
+<div id="foot-mount"></div>
+
+<script src="assets/data.js"></script>
+<script src="assets/comun.js"></script>
+<script>
+initChrome({active:'index', pagenav:false});
+$('#heroStats').innerHTML = [
+  [ST.noches,'noches'],[ST.destinos,'destinos'],[ST.paises,'países'],
+  [ST.totalRedondo,'plan elegido'],[3,'clubs top en Ibiza']
+].map(([b,s])=>`<div class="stat"><b>${b}</b><small>${s}</small></div>`).join('');
+$('#heroRoute').innerHTML = DESTINOS.map(d=>`<span class="pin">${d.n.split(' ')[0]}</span>`).join('<span class="arr">→</span>');
+$('#heroUpdated').textContent = '● Actualizado el '+new Date().toLocaleDateString('es-ES',{day:'numeric',month:'long',year:'numeric'});
+$('#indexGrid').innerHTML = PAGES.filter(p=>p.key!=='index').map(p=>`
+  <a class="index-card" href="${p.href}">
+    <div class="ic">${p.icon}</div>
+    <h3>${p.label}</h3>
+    <p>${p.desc}</p>
+    <span class="go">Abrir ${p.label} →</span>
+  </a>`).join('');
+</script>
+</body>
+</html>

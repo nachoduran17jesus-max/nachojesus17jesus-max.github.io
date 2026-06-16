@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mapa · Ruta Mediterránea 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<link rel="stylesheet" href="assets/estilo.css">
+</head>
+<body>
+<div id="nav-mount"></div>
+<div id="head-mount"></div>
+
+<section><div class="wrap">
+  <div id="map"></div>
+  <div class="map-legend">
+    <span><span class="ll-line"></span> Tierra / ferry</span>
+    <span><span class="ll-dash"></span> Vuelo</span>
+    <span><span class="ll-dot"></span> Parada (clic para info)</span>
+  </div>
+</div></section>
+
+<div id="foot-mount"></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="assets/data.js"></script>
+<script src="assets/comun.js"></script>
+<script>
+initChrome({active:'mapa', eyebrow:'El recorrido', titulo:'Mapa interactivo de la ruta',
+  sub:'Cada punto es una parada numerada en orden. Haz clic para ver fechas, presupuesto, eventos cercanos, alojamiento y transporte. La línea sólida es viaje terrestre/ferry; la punteada roja son los vuelos (Niza→Split y el regreso Albania→Mallorca).'});
+
+const map = L.map('map',{scrollWheelZoom:false}).setView([42,13],5);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{attribution:'&copy; OpenStreetMap &copy; CARTO',maxZoom:18}).addTo(map);
+const idx = Object.fromEntries(DESTINOS.map(d=>[d.id,d]));
+TRAMOS.forEach(t=>{const a=idx[t.de].coords,b=idx[t.a].coords;
+  L.polyline([a,b],{color:t.modo==='aire'?'#e74c3c':'#1769a8',weight:t.modo==='aire'?2.5:3.5,opacity:.85,dashArray:t.modo==='aire'?'8,9':null}).addTo(map);});
+const bounds=[];
+DESTINOS.forEach((d,i)=>{bounds.push(d.coords);
+  const icon=L.divIcon({html:`<div class="num-badge" style="background:${d.color}">${i+1}</div>`,className:'',iconSize:[30,30],iconAnchor:[15,15]});
+  const ev=d.eventos.filter(e=>e.prioridad==='alta')[0];
+  const pop=`<div class="pop"><h4>${i+1}. ${d.n}</h4><div class="pf">${d.pais} · ${d.fechas} · ${d.noches} noches</div>
+    <div class="prow"><b>${eur(d.costoDia)}</b>/día + transporte ${eur(d.transporteCosto)} · total <b>${eur(costoTotal(d))}</b></div>
+    <div class="prow">🏠 ${d.aloja.split('.')[0]}</div><div class="prow">🚌 ${d.transporteIn}</div>
+    ${ev?`<div class="pev">🎧 ${ev.nombre} · ${ev.lugar}</div>`:''}</div>`;
+  L.marker(d.coords,{icon}).addTo(map).bindPopup(pop);});
+map.fitBounds(bounds,{padding:[40,40]});
+</script>
+</body>
+</html>

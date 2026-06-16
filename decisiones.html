@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Decisiones · Ruta Mediterránea 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/estilo.css">
+</head>
+<body>
+<div id="nav-mount"></div>
+<div id="head-mount"></div>
+
+<section><div class="wrap">
+  <div class="dec-grid" id="dec-grid"></div>
+</div></section>
+
+<div id="foot-mount"></div>
+
+<script src="assets/data.js"></script>
+<script src="assets/comun.js"></script>
+<script>
+initChrome({active:'decisiones', eyebrow:'Decisiones importantes', titulo:'Comparador: qué conviene y qué no',
+  sub:'Las preguntas que mueven el presupuesto y la ruta, con veredicto claro. Verde = sí; naranja = depende; rojo = no.'});
+
+$('#dec-grid').innerHTML=DECISIONES.map(d=>`<div class="dec ${d.nivel}"><h4>${d.q}</h4><div class="vd">${d.veredicto}</div><p>${d.razon}</p></div>`).join('');
+</script>
+</body>
+</html>

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Eventos · Ruta Mediterránea 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/estilo.css">
+</head>
+<body>
+<div id="nav-mount"></div>
+<div id="head-mount"></div>
+
+<section style="background:var(--negro)"><div class="wrap">
+  <div class="ev-list" id="ev-list"></div>
+  <p style="color:#7f8c98;font-size:.8rem;margin-top:18px">Sonus 2026 está cancelado (lo reemplaza Night Horizon en Zrće). Hideout 2026 es 30 jun–3 jul, antes de tu llegada. Defected Croatia (final, 29 jul–3 ago) exigiría rearmar el inicio: no entra en este plan.</p>
+</div></section>
+
+<div id="foot-mount"></div>
+
+<script src="assets/data.js"></script>
+<script src="assets/comun.js"></script>
+<script>
+initChrome({active:'eventos', eyebrow:'Música electrónica', titulo:'Eventos cruzados con la ruta',
+  sub:'Lo que calza con tus fechas y destinos. En rojo, las prioridades. El gran premio es el finde de Ibiza con tres residencias en fila.'});
+
+const all=[];
+DESTINOS.forEach(d=>d.eventos.forEach(e=>all.push({...e,ciudad:d.n})));
+const ord={alta:0,media:1,baja:2,info:3};
+all.sort((a,b)=>ord[a.prioridad]-ord[b.prioridad]);
+$('#ev-list').innerHTML=all.map(e=>`<div class="ev-item">
+  ${e.prioridad==='alta'?'<div class="star">★ Prioridad</div>':''}
+  <h4>${e.nombre}</h4><div class="w">${e.cuando}</div>
+  <div class="pl">📍 ${e.lugar} · ${e.ciudad}</div>
+  <a href="${e.link}" target="_blank" rel="noopener">Ver más ↗</a></div>`).join('');
+</script>
+</body>
+</html>

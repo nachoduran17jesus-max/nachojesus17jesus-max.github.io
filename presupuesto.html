@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Presupuesto · Ruta Mediterránea 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/estilo.css">
+</head>
+<body>
+<div id="nav-mount"></div>
+<div id="head-mount"></div>
+
+<section><div class="wrap">
+  <div class="budget-toggle" id="budget-toggle"></div>
+  <div class="budget-grid">
+    <div class="tabcard"><table id="budget-table"></table></div>
+    <div class="budget-side" id="budget-side"></div>
+  </div>
+  <div class="citytab"><table id="city-budget"></table></div>
+  <p style="font-size:.78rem;color:var(--gris);margin-top:10px">* Estimaciones en EUR (hostales, FlixBus, Ryanair/Vueling, ferries, verano 2026). Reservar con anticipación baja bastante, sobre todo el vuelo Albania→Mallorca y las entradas de Ibiza.</p>
+</div></section>
+
+<div id="foot-mount"></div>
+
+<script src="assets/data.js"></script>
+<script src="assets/comun.js"></script>
+<script>
+initChrome({active:'presupuesto', eyebrow:'Cuánto cuesta el viaje', titulo:'Presupuesto del recorrido',
+  sub:'Tres escenarios para los 48 días, viajando solo. Tu plan elegido (Albania + Mallorca + 3 clubs en Ibiza) es "Equilibrada" ≈ €3.400. La "Barata" (~€2.950) te devuelve a tu tope quitando/acortando Mallorca.'});
+
+const escs=[{k:'barata',label:'Barata · tu tope'},{k:'equilibrada',label:'Equilibrada · plan elegido'},{k:'premium',label:'Fiestera / premium'}];
+let escA='equilibrada';
+$('#budget-toggle').innerHTML=escs.map(e=>`<button data-k="${e.k}">${e.label}</button>`).join('');
+function renderBudget(){
+  const cats=PRESUPUESTO.categorias, total=cats.reduce((s,c)=>s+c[escA],0);
+  const max=Math.max(...cats.map(c=>c[escA]));
+  const rows=cats.map(c=>{const w=(c[escA]/max*100).toFixed(0);
+    return `<tr><td>${c.cat}</td><td class="r bar-cell"><span class="bar" style="width:${w}%"></span><span>${eur(c[escA])}</span></td></tr>`;}).join('');
+  $('#budget-table').innerHTML=`<tr><th>Categoría</th><th class="r">Estimado (48 días)</th></tr>${rows}<tr class="total"><td>Total</td><td class="r">${eur(total)}</td></tr>`;
+  const eq=cats.reduce((s,c)=>s+c.equilibrada,0);
+  const diff=total-eq;
+  const diffTxt = escA==='equilibrada' ? 'Escenario elegido.' :
+    (diff>0?`+${eur(diff)} sobre el plan elegido`:`${eur(diff)} vs. plan elegido (ahorras ${eur(-diff)})`);
+  $('#budget-side').innerHTML=`<div class="eyebrow">Escenario</div><div class="gauge">${eur(total)}</div><div class="perday">≈ ${eur(Math.round(total/48))}/día durante 48 días</div><div class="budget-note">${PRESUPUESTO.notas[escA]}</div><div class="vs-top"><b>${diffTxt}</b></div>`;
+  document.querySelectorAll('#budget-toggle button').forEach(b=>b.classList.toggle('active',b.dataset.k===escA));
+}
+$('#budget-toggle').addEventListener('click',e=>{if(e.target.dataset.k){escA=e.target.dataset.k;renderBudget();}});
+renderBudget();
+
+let gt=0;
+const crows=DESTINOS.map((d,i)=>{const t=costoTotal(d);gt+=t;
+  return `<tr><td>${i+1}. ${d.n}</td><td>${d.noches}</td><td>${eur(d.costoDia)}</td><td>${eur(d.transporteCosto)}</td><td>${eur(t)}</td></tr>`;}).join('');
+$('#city-budget').innerHTML=`<tr><th>Destino</th><th>Noches</th><th>€/día</th><th>Transporte</th><th>Subtotal</th></tr>${crows}<tr class="gt"><td>Total ruta completa</td><td>${ST.noches}</td><td>—</td><td>—</td><td>${eur(gt)}</td></tr>`;
+</script>
+</body>
+</html>

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Destinos · Ruta Mediterránea 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/estilo.css">
+</head>
+<body>
+<div id="nav-mount"></div>
+<div id="head-mount"></div>
+
+<section><div class="wrap">
+  <div class="controls">
+    <div class="search"><input id="search" type="text" placeholder="Buscar destino, país o región…" autocomplete="off"></div>
+    <div class="ctrl-group">
+      <label>País</label>
+      <select id="filterPais"></select>
+    </div>
+    <div class="ctrl-group">
+      <label>Orden</label>
+      <select id="sortBy">
+        <option value="ruta">Orden de la ruta</option>
+        <option value="costoDesc">Costo total ↓</option>
+        <option value="costoAsc">Costo total ↑</option>
+        <option value="fiesta">Más fiesta</option>
+        <option value="playa">Mejor playa</option>
+        <option value="nochesDesc">Más noches</option>
+      </select>
+    </div>
+  </div>
+  <div class="fbtns" id="tipoFiltros"></div>
+  <div class="count-line" id="countLine"></div>
+  <div class="grid" id="cards"></div>
+</div></section>
+
+<div id="foot-mount"></div>
+
+<script src="assets/data.js"></script>
+<script src="assets/comun.js"></script>
+<script>
+initChrome({active:'destinos', eyebrow:'Guía por ciudad', titulo:'Plan detallado de cada destino',
+  sub:'Busca, filtra por país o tipo, y ordena por costo, fiesta o playa. Dentro de "📖 Guía completa" tienes imprescindibles, dónde comer, vida nocturna, alojamiento, cómo llegar y enlaces de cada ciudad.'});
+
+const ORDEN_RUTA = Object.fromEntries(DESTINOS.map((d,i)=>[d.id,i]));
+let estado = {q:'', pais:'', tipo:'', sort:'ruta'};
+
+const paises = ['Todos', ...Array.from(new Set(DESTINOS.map(d=>d.pais)))];
+$('#filterPais').innerHTML = paises.map(p=>`<option value="${p==='Todos'?'':p}">${p}</option>`).join('');
+
+const tipos = Array.from(new Set(DESTINOS.flatMap(d=>d.tipo))).sort();
+$('#tipoFiltros').innerHTML = `<button class="fbtn active" data-tipo="">Todos los tipos</button>` +
+  tipos.map(t=>`<button class="fbtn" data-tipo="${t}">${t}</button>`).join('');
+
+function cardHTML(d){
+  const i = ORDEN_RUTA[d.id];
+  const ev = d.eventos.length? d.eventos.map(e=>`<div class="evbox">🎧 <a href="${e.link}" target="_blank" rel="noopener" class="${e.prioridad==='alta'?'pri-alta':''}">${e.nombre}</a> · ${e.lugar}<br><span style="color:var(--gris)">${e.cuando}</span></div>`).join('') : '<div style="font-size:.82rem;color:var(--gris)">Sin eventos electrónicos marquee en estas fechas. Vida de bar/local.</div>';
+  const imp = (d.imprescindible||[]).map(x=>`<li>${x}</li>`).join('');
+  const lks = (d.links||[]).map(l=>`<a href="${l.u}" target="_blank" rel="noopener">${l.t} ↗</a>`).join('');
+  return `<div class="card">
+    <div class="card-photo">
+      <div class="bg" style="background:linear-gradient(135deg,${d.color},#0d3b5c)"></div>
+      <img src="${fotoURL(d)}" alt="${d.n}" loading="lazy" onload="this.classList.add('loaded')" onerror="this.remove()">
+      <div class="step" style="background:${d.color}">${i+1}</div>
+      <div class="ov"><h3>${d.n}</h3><div class="meta">${d.pais} · ${d.region} · ${d.fechas} · ${d.noches} noches</div></div>
+    </div>
+    <div class="card-body">
+      <div class="levels">
+        <div class="level"><b>Fiesta</b>${dots(d.fiesta,'onf')}</div>
+        <div class="level"><b>Playa</b>${dots(d.playa,'onp')}</div>
+        <div class="level"><b>Networking</b>${dots(d.networking,'on')}</div>
+      </div>
+      <div class="field"><span class="lab">Por qué vale la pena</span>${d.porQue}</div>
+      <details class="guia"><summary>📖 Guía completa de ${d.n.split(' +')[0].split(' /')[0]}</summary>
+        <div class="guia-in">
+          <div class="gblock"><span class="lab">Imprescindible</span><ul>${imp}</ul></div>
+          <div class="gblock"><span class="lab">De día</span><p>${d.dia}</p></div>
+          <div class="gblock"><span class="lab">De noche</span><p>${d.noche}</p></div>
+          <div class="gblock"><span class="lab">Dónde comer</span><p>${d.comer||'—'}</p></div>
+          <div class="gblock"><span class="lab">Eventos cercanos</span>${ev}</div>
+          <div class="gblock"><span class="lab">Alojamiento</span><p>${d.aloja}</p></div>
+          <div class="gblock"><span class="lab">Cómo llegar</span><p>${d.transporteIn}</p></div>
+          <div class="gblock"><span class="lab">Enlaces</span><div class="lks">${lks}</div></div>
+        </div>
+      </details>
+      <div class="verdict"><b>¿Conviene?</b> ${d.conviene}</div>
+      <div class="cost-row"><span style="font-size:.8rem;color:var(--gris)">${eur(d.costoDia)}/día · transporte ${eur(d.transporteCosto)}</span>
+        <span class="big">${eur(costoTotal(d))}</span></div>
+    </div></div>`;
+}
+
+function renderCards(){
+  const q = estado.q.trim().toLowerCase();
+  let list = DESTINOS.filter(d=>{
+    if(estado.pais && d.pais!==estado.pais) return false;
+    if(estado.tipo && !d.tipo.includes(estado.tipo)) return false;
+    if(q){
+      const hay = (d.n+' '+d.pais+' '+d.region+' '+d.tipo.join(' ')+' '+d.porQue).toLowerCase();
+      if(!hay.includes(q)) return false;
+    }
+    return true;
+  });
+  const sorters = {
+    ruta:(a,b)=>ORDEN_RUTA[a.id]-ORDEN_RUTA[b.id],
+    costoDesc:(a,b)=>costoTotal(b)-costoTotal(a),
+    costoAsc:(a,b)=>costoTotal(a)-costoTotal(b),
+    fiesta:(a,b)=>b.fiesta-a.fiesta,
+    playa:(a,b)=>b.playa-a.playa,
+    nochesDesc:(a,b)=>b.noches-a.noches
+  };
+  list.sort(sorters[estado.sort]||sorters.ruta);
+  $('#cards').innerHTML = list.length ? list.map(cardHTML).join('')
+    : `<div class="empty">No hay destinos que coincidan con tu búsqueda. <a href="#" onclick="resetFiltros();return false">Limpiar filtros</a>.</div>`;
+  const sub = list.reduce((s,d)=>s+costoTotal(d),0);
+  $('#countLine').innerHTML = list.length===DESTINOS.length
+    ? `Mostrando <b>${list.length}</b> destinos · costo total de la ruta <b>${eur(sub)}</b>`
+    : `Mostrando <b>${list.length}</b> de ${DESTINOS.length} destinos · subtotal filtrado <b>${eur(sub)}</b>`;
+}
+window.resetFiltros = function(){
+  estado={q:'',pais:'',tipo:'',sort:'ruta'};
+  $('#search').value=''; $('#filterPais').value=''; $('#sortBy').value='ruta';
+  document.querySelectorAll('#tipoFiltros .fbtn').forEach(b=>b.classList.toggle('active',b.dataset.tipo===''));
+  renderCards();
+};
+$('#search').addEventListener('input',e=>{estado.q=e.target.value;renderCards();});
+$('#filterPais').addEventListener('change',e=>{estado.pais=e.target.value;renderCards();});
+$('#sortBy').addEventListener('change',e=>{estado.sort=e.target.value;renderCards();});
+$('#tipoFiltros').addEventListener('click',e=>{
+  const b=e.target.closest('.fbtn'); if(!b) return;
+  estado.tipo=b.dataset.tipo;
+  document.querySelectorAll('#tipoFiltros .fbtn').forEach(x=>x.classList.toggle('active',x===b));
+  renderCards();
+});
+renderCards();
+</script>
+</body>
+</html>

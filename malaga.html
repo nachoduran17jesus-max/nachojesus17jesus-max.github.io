@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vida en Málaga · Ruta Mediterránea 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/estilo.css">
+</head>
+<body>
+<div id="nav-mount"></div>
+<div id="head-mount"></div>
+
+<section><div class="wrap">
+  <div class="budget-grid">
+    <div class="tabcard"><table id="mlg-table"></table></div>
+    <div class="budget-side" id="mlg-side"></div>
+  </div>
+  <p style="font-size:.82rem;color:var(--gris);margin-top:14px" id="mlg-nota"></p>
+</div></section>
+
+<div id="foot-mount"></div>
+
+<script src="assets/data.js"></script>
+<script src="assets/comun.js"></script>
+<script>
+initChrome({active:'malaga', eyebrow:'Ya en Málaga', titulo:'Vida mensual en Málaga (intercambio)',
+  sub:MALAGA_VIDA.intro});
+
+$('#mlg-nota').textContent=MALAGA_VIDA.nota;
+const it=MALAGA_VIDA.items;
+const tot=it.reduce((a,i)=>({eco:a.eco+i.eco,tip:a.tip+i.tip,hol:a.hol+i.hol}),{eco:0,tip:0,hol:0});
+const mrows=it.map(i=>{const nm=i.link?`<a href="${i.link}" target="_blank" rel="noopener">${i.c} ↗</a>`:i.c;
+  return `<tr><td>${nm}</td><td class="r">${eur(i.eco)}</td><td class="r">${eur(i.tip)}</td><td class="r">${eur(i.hol)}</td></tr>`;}).join('');
+$('#mlg-table').innerHTML=`<tr><th>Concepto (mensual)</th><th class="r">Económico</th><th class="r">Típico</th><th class="r">Cómodo</th></tr>${mrows}<tr class="total"><td>Total / mes</td><td class="r">${eur(tot.eco)}</td><td class="r">${eur(tot.tip)}</td><td class="r">${eur(tot.hol)}</td></tr>`;
+$('#mlg-side').innerHTML=`<div class="eyebrow">Coste típico</div><div class="gauge">${eur(tot.tip)}</div><div class="perday">al mes · viviendo en piso compartido</div><div class="budget-note">Para un semestre (≈5 meses) calcula entre <b>${eur(tot.eco*5)}</b> y <b>${eur(tot.hol*5)}</b>, con <b>${eur(tot.tip*5)}</b> como referencia realista (sin contar matrícula ni vuelos).</div>`;
+</script>
+</body>
+</html>

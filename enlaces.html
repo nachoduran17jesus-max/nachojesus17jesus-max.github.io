@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Enlaces · Ruta Mediterránea 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/estilo.css">
+</head>
+<body>
+<div id="nav-mount"></div>
+<div id="head-mount"></div>
+
+<section><div class="wrap">
+  <div class="enlaces-grid" id="enlaces-grid"></div>
+
+  <div class="twocol" style="margin-top:40px">
+    <div class="callout">
+      <h3>📋 Datos que me ayudarían a afinar</h3>
+      <ul>
+        <li>Sube tus 2 páginas previas con el clip 📎 (no como ruta file://) para cruzar tus links de DJs.</li>
+        <li>Hora del vuelo de llegada a Barajas el 19 jul.</li>
+        <li>DJs innegociables vs "si calza" (Keinemusik, Peggy Gou, Mochakk, PAWSA…).</li>
+        <li>Albania: ¿solo Ksamil/Sarandë o subir por la Riviera (Dhërmi/Himarë)?</li>
+        <li>¿Reservo con Mallorca fija (~€3.400) o dejo lista la versión barata (~€2.950)?</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <h3>🛠️ Sobre este sitio</h3>
+      <p style="font-size:.9rem;color:var(--gris);margin-bottom:10px">Es un sitio de <b>varias páginas</b>: cada sección es un archivo HTML propio dentro de la carpeta <code>sitio/</code>, y todos comparten los datos y estilos de <code>sitio/assets/</code>.</p>
+      <p style="font-size:.9rem;color:var(--gris)">Para abrirlo, entra por <code>index.html</code>. Mantén la carpeta <code>assets/</code> junto a las páginas. Solo necesita internet para el mapa y las fotos.</p>
+    </div>
+  </div>
+</div></section>
+
+<div id="foot-mount"></div>
+
+<script src="assets/data.js"></script>
+<script src="assets/comun.js"></script>
+<script>
+initChrome({active:'enlaces', eyebrow:'Para reservar', titulo:'Enlaces útiles',
+  sub:'Las webs que vas a usar para comparar y reservar transporte, camas y entradas. Cada ciudad además tiene sus propios enlaces dentro de su guía.'});
+
+$('#enlaces-grid').innerHTML=ENLACES.map(l=>`<a class="enlace" href="${l.u}" target="_blank" rel="noopener"><span>🔗</span>${l.t}</a>`).join('');
+</script>
+</body>
+</html>
